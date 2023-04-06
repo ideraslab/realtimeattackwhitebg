@@ -1,680 +1,715 @@
 <!DOCTYPE html>
 
 <head>
-  <meta charset="utf-8">
+    <meta charset="utf-8">
 
-  <!-- https://ocularwarfare.com/index.html?org_name=hrbrmstr&drill_mode=1&lat=3.151&lon=101.713 -->
-  <style>
-    #reat-time-attack-body {
-      margin: 0;
-      width: 98%;
-      padding: 0;
-      background: #000000;
-      background-repeat: no-repeat;
-      -webkit-background-size: cover;
-      -moz-background-size: cover;
-      -o-background-size: cover;
-      background-size: cover;
-    }
+    <!-- https://ocularwarfare.com/index.html?org_name=hrbrmstr&drill_mode=1&lat=3.151&lon=101.713 -->
+    <style>
+        #reat-time-attack-body {
+            margin: 0;
+            width: 98%;
+            padding: 0;
+            background: transparent;
+            background-repeat: no-repeat;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+        }
+        
+        #titlediv {
+            font-family: monospace;
+            text-align: center;
+            font-size: 48px;
+            position: fixed;
+            width: 100%;
+            height: 10px;
+            color: white;
+            background-color: #6e2e2e;
+            padding-top: 20%;
+            overflow-y: auto;
+        }
+        
+        #attackdiv {
+            font-family: monospace;
+            font-size: 14px;
+            position: fixed;
+            width: 40%;
+            height: 100px;
+            color: rgb(19, 18, 18);
+            background-color: #e4f3ee;
+            padding: 5px;
+            bottom: 0px;
+            overflow-y: hidden;
+            border: 1px solid #6b7777;
+            border-bottom: none;
+        }
+        /* Desktops and laptops ----------- */
+        
+        @media only screen and (max-width: 450px) {
+            #attackdiv {
+                font-family: monospace;
+                font-size: 14px;
+                position: fixed;
+                width: 98%;
+                height: 70px;
+                color: rgb(0, 0, 0);
+                background-color: #808f8f;
+                padding: 3px;
+                bottom: 0px;
+                overflow-y: hidden;
+                border: 1px solid #e0e9e9;
+                border-bottom: none;
+            }
+        }
+        
+        #realTime_attacks {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 100%;
+            max-height: 100%
+        }
+        
+        #simplemodal-container code {
+            background: #d0dbdb;
+            border-left: 3px solid #65B43D;
+            color: #bbb;
+            display: block;
+            font-size: 12px;
+            margin-bottom: 12px;
+            padding: 4px 6px 6px;
+        }
+        
+        #simplemodal-container a {
+            color: #ddd;
+        }
+        
+        #simplemodal-container h3 {
+            color: #84b8d9;
+        }
+        
+        #simplemodal-container a.modalCloseImg {
+            background: url(x.png) no-repeat;
+            /* adjust url as required */
+            width: 25px;
+            height: 29px;
+            display: inline;
+            z-index: 3200;
+            position: absolute;
+            top: -15px;
+            right: -18px;
+            cursor: pointer;
+        }
+        
+        .hoverinfo {
+            color: red;
+        }
+    </style>
 
-    #titlediv {
-      font-family: monospace;
-      text-align: center;
-      font-size: 48px;
-      position: fixed;
-      width: 100%;
-      height: 10px;
-      color: white;
-      background-color: #6e2e2e;
-      padding-top: 20%;
-      overflow-y: auto;
-    }
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://d3js.org/d3.geo.projection.v0.min.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script src="https://datamaps.github.io/scripts/datamaps.world.min.js?v=1"></script>
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="jquery.simplemodal-1.4.4.js"></script>
 
-    #attackdiv {
-      font-family: monospace;
-      font-size: 14px;
-      position: fixed;
-      width: 40%;
-      height: 100px;
-      color: white;
-      background-color: #000000;
-      padding: 5px;
-      bottom: 0px;
-      overflow-y: hidden;
-      border: 1px solid #031111;
-      border-bottom: none;
-    }
-
-    /* Desktops and laptops ----------- */
-    @media only screen and (max-width : 450px) {
-      #attackdiv {
-        font-family: monospace;
-        font-size: 14px;
-        position: fixed;
-        width: 98%;
-        height: 70px;
-        color: white;
-        background-color: #0b0e0e;
-        padding: 3px;
-        bottom: 0px;
-        overflow-y: hidden;
-        border: 1px solid #010707;
-        border-bottom: none;
-      }
-    }
-
-    #realTime_attacks {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      max-width: 100%;
-      max-height: 100%
-    }
-
-    #simplemodal-container code {
-      background: #d0dbdb;
-      border-left: 3px solid #65B43D;
-      color: #bbb;
-      display: block;
-      font-size: 12px;
-      margin-bottom: 12px;
-      padding: 4px 6px 6px;
-    }
-
-    #simplemodal-container a {
-      color: #ddd;
-    }
-
-    #simplemodal-container h3 {
-      color: #84b8d9;
-    }
-
-    #simplemodal-container a.modalCloseImg {
-      background: url(x.png) no-repeat;
-      /* adjust url as required */
-      width: 25px;
-      height: 29px;
-      display: inline;
-      z-index: 3200;
-      position: absolute;
-      top: -15px;
-      right: -18px;
-      cursor: pointer;
-    }
-
-    .hoverinfo {
-      color: red;
-    }
-
-
-  
-  </style>
-
-  <script src="https://d3js.org/d3.v3.min.js"></script>
-  <script src="https://d3js.org/d3.geo.projection.v0.min.js"></script>
-  <script src="https://d3js.org/topojson.v1.min.js"></script>
-  <script src="https://datamaps.github.io/scripts/datamaps.world.min.js?v=1"></script>
-  <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-  <script src="jquery.simplemodal-1.4.4.js"></script>
-
-  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
 </head>
 
 <body id="reat-time-attack-body">
-<div class="main-container" style="display: flex; flex-direction:column;">
-  <div>
-      <audio id="starwars" src="Blaster-Solo.wav" preload="auto"></audio>
-      <audio id="tng" src="tng_torpedo_clean.mp3" preload="auto"></audio>
-      <audio id="b5" src="B5-interceptor1.wav" preload="auto"></audio>
-      <audio id="wargames" src="WarGames-KeyPress.wav" preload="auto"></audio>
-      <audio id="pew" src="pew.mp3" preload="auto"></audio>
-      <audio id="galaga" src="shot_sound.mp3" preload="auto"></audio>
-      <audio id="asteroids" src="asteroids.mp3" preload="auto"></audio>
-      <audio id="china" src="china.mp3" preload="auto"></audio>
-      <audio id="timallen" src="timallen.wav" preload="auto"></audio>
-      <center>
-        <div id="realTime_attacks"></div>
-      </center>
-      <!-- <div id="titlediv">IPew Attack Map</div> -->
-      <div>
-        <span id="attackdiv"> </span>
-      </div>
-  </div>
-</div>
-<script>
-  // setup default min/max timer range for random draw
-  attack_min = 100;
-  attack_max = 2000;
+    <div class="main-container" style="display: flex; flex-direction:column;">
+        <div>
+            <audio id="starwars" src="Blaster-Solo.wav" preload="auto"></audio>
+            <audio id="tng" src="tng_torpedo_clean.mp3" preload="auto"></audio>
+            <audio id="b5" src="B5-interceptor1.wav" preload="auto"></audio>
+            <audio id="wargames" src="WarGames-KeyPress.wav" preload="auto"></audio>
+            <audio id="pew" src="pew.mp3" preload="auto"></audio>
+            <audio id="galaga" src="shot_sound.mp3" preload="auto"></audio>
+            <audio id="asteroids" src="asteroids.mp3" preload="auto"></audio>
+            <audio id="china" src="china.mp3" preload="auto"></audio>
+            <audio id="timallen" src="timallen.wav" preload="auto"></audio>
+            <center>
+                <div id="realTime_attacks"></div>
+            </center>
+            <!-- <div id="titlediv">IPew Attack Map</div> -->
+            <div>
+                <span id="attackdiv"> </span>
+            </div>
+        </div>
+    </div>
+    <script>
+        // setup default min/max timer range for random draw
+        attack_min = 100;
+        attack_max = 2000;
 
-  // add/change the attack types here
-  attack_type = ["any port scan in a storm", "ssh brutish force", "Thought Leader Tweet",
-    "SYN FLOOD BA-BY", "Spotty", "Heartbleed Hotel", "Po_ODLE", "Sharknado",
-    "CORGI Attack","Trojan ", "Ping of DOOM", "Conficker", "Goldfinger", "SANDPAPER",
-    "SNAILshock", "Spaghetti RAT", "Driduplex"
-  ];
+        // add/change the attack types here
+        attack_type = ["any port scan in a storm", "ssh brutish force", "Thought Leader Tweet",
+            "SYN FLOOD BA-BY", "Spotty", "Heartbleed Hotel", "Po_ODLE", "Sharknado",
+            "CORGI Attack", "Trojan ", "Ping of DOOM", "Conficker", "Goldfinger", "SANDPAPER",
+            "SNAILshock", "Spaghetti RAT", "Driduplex"
+        ];
 
 
-  // need this to more easily grab URI query parameters
-  $.extend({
-    getUrlVars: function() {
-      var vars = [],
-              hash;
-      var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-      for (var i = 0; i < hashes.length; i++) {
-        hash = hashes[i].split('=');
-        vars.push(hash[0]);
-        vars[hash[0]] = hash[1];
-      }
-      return vars;
-    },
-    getUrlVar: function(name) {
-      return $.getUrlVars()[name];
-    }
-  });
+        // need this to more easily grab URI query parameters
+        $.extend({
+            getUrlVars: function() {
+                var vars = [],
+                    hash;
+                var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+                for (var i = 0; i < hashes.length; i++) {
+                    hash = hashes[i].split('=');
+                    vars.push(hash[0]);
+                    vars[hash[0]] = hash[1];
+                }
+                return vars;
+            },
+            getUrlVar: function(name) {
+                return $.getUrlVars()[name];
+            }
+        });
 
-  // here is where we deal with parameters
-  // try to grab them, see if they exist, make changes to defaults if they do
+        // here is where we deal with parameters
+        // try to grab them, see if they exist, make changes to defaults if they do
 
-  var norse_mode = $.getUrlVar('norse_mode');
-  var bad_day = $.getUrlVar('bad_day');
-  var org_name = $.getUrlVar('org_name');
-  var chatt_mode = $.getUrlVar('chatt_mode');
-  var china_mode = $.getUrlVar('china_mode');
-  var dprk_mode = $.getUrlVar('dprk_mode');
-  var employee_mode = $.getUrlVar('employee_mode');
-  var employee_fname = $.getUrlVar('employee_fname');
-  var employee_lname = $.getUrlVar('employee_lname');
-  var origin = $.getUrlVar('origin');
-  var random_mode = $.getUrlVar('random_mode');
-  var tng = $.getUrlVar('tng');
-  var wargames = $.getUrlVar('wargames');
-  var b5 = $.getUrlVar('b5');
-  var nofx = $.getUrlVar('nofx');
-  var pew = $.getUrlVar('pew');
-  var allfx = $.getUrlVar('allfx')
-  var galaga = $.getUrlVar('galaga')
-  var asteroids = $.getUrlVar('asteroids')
-  var china = $.getUrlVar('china')
-  var timallen = $.getUrlVar('timallen')
-  var drill_mode = $.getUrlVar("drill_mode")
-  var in_lat = $.getUrlVar("lat")
-  var in_lon = $.getUrlVar("lon")
-  var destination = $.getUrlVar("destination")
-  var greenattacks = $.getUrlVar("greenattacks")
-  var redattacks = $.getUrlVar("redattacks")
+        var norse_mode = $.getUrlVar('norse_mode');
+        var bad_day = $.getUrlVar('bad_day');
+        var org_name = $.getUrlVar('org_name');
+        var chatt_mode = $.getUrlVar('chatt_mode');
+        var china_mode = $.getUrlVar('china_mode');
+        var dprk_mode = $.getUrlVar('dprk_mode');
+        var employee_mode = $.getUrlVar('employee_mode');
+        var employee_fname = $.getUrlVar('employee_fname');
+        var employee_lname = $.getUrlVar('employee_lname');
+        var origin = $.getUrlVar('origin');
+        var random_mode = $.getUrlVar('random_mode');
+        var tng = $.getUrlVar('tng');
+        var wargames = $.getUrlVar('wargames');
+        var b5 = $.getUrlVar('b5');
+        var nofx = $.getUrlVar('nofx');
+        var pew = $.getUrlVar('pew');
+        var allfx = $.getUrlVar('allfx')
+        var galaga = $.getUrlVar('galaga')
+        var asteroids = $.getUrlVar('asteroids')
+        var china = $.getUrlVar('china')
+        var timallen = $.getUrlVar('timallen')
+        var drill_mode = $.getUrlVar("drill_mode")
+        var in_lat = $.getUrlVar("lat")
+        var in_lon = $.getUrlVar("lon")
+        var destination = $.getUrlVar("destination")
+        var greenattacks = $.getUrlVar("greenattacks")
+        var redattacks = $.getUrlVar("redattacks")
 
-  snd_id = "starwars";
-  if (typeof tng !== 'undefined') {
-    snd_id = "tng";
-  }
-  if (typeof b5 !== 'undefined') {
-    snd_id = "b5";
-  }
-  if (typeof wargames !== 'undefined') {
-    snd_id = "wargames";
-  }
-  if (typeof pew !== 'undefined') {
-    snd_id = "pew";
-  }
-  if (typeof galaga !== 'undefined') {
-    snd_id = "galaga";
-  }
-  if (typeof asteroids !== 'undefined') {
-    snd_id = "asteroids";
-  }
-  if (typeof china !== 'undefined') {
-    snd_id = "china";
-  }
-  if (typeof timallen !== 'undefined') {
-    snd_id = "timallen";
-  }
-
-  if (typeof bad_day !== 'undefined') {
-    attack_min = 200;
-    attack_max = 200;
-  }
-
-  if (typeof org_name !== 'undefined') {
-    $("#titlediv").text(decodeURI(org_name) + " IPew Attack Map").html()
-  }
-
-  // we maintain a fixed queue of "attacks" via this class
-  function FixedQueue(size, initialValues) {
-    initialValues = (initialValues || []);
-    var queue = Array.apply(null, initialValues);
-    queue.fixedSize = size;
-    queue.push = FixedQueue.push;
-    queue.splice = FixedQueue.splice;
-    queue.unshift = FixedQueue.unshift;
-    FixedQueue.trimTail.call(queue);
-    return (queue);
-  }
-
-  FixedQueue.trimHead = function() {
-    if (this.length <= this.fixedSize) {
-      return;
-    }
-    Array.prototype.splice.call(this, 0, (this.length - this.fixedSize));
-  };
-
-  FixedQueue.trimTail = function() {
-    if (this.length <= this.fixedSize) {
-      return;
-    }
-    Array.prototype.splice.call(this, this.fixedSize, (this.length - this.fixedSize));
-  };
-
-  FixedQueue.wrapMethod = function(methodName, trimMethod) {
-    var wrapper = function() {
-      var method = Array.prototype[methodName];
-      var result = method.apply(this, arguments);
-      trimMethod.call(this);
-      return (result);
-    };
-    return (wrapper);
-  };
-
-  FixedQueue.push = FixedQueue.wrapMethod("push", FixedQueue.trimHead);
-  FixedQueue.splice = FixedQueue.wrapMethod("splice", FixedQueue.trimTail);
-  FixedQueue.unshift = FixedQueue.wrapMethod("unshift", FixedQueue.trimTail);
-
-  var rand = function(min, max) {
-    return Math.random() * (max - min) + min;
-  };
-
-  var getRandomCountry = function(countries, weight) {
-
-    var total_weight = weight.reduce(function(prev, cur, i, arr) {
-      return prev + cur;
-    });
-
-    var random_num = rand(0, total_weight);
-    var weight_sum = 0;
-
-    for (var i = 0; i < countries.length; i++) {
-      weight_sum += weight[i];
-      weight_sum = +weight_sum.toFixed(2);
-
-      if (random_num <= weight_sum) {
-        return countries[i];
-      }
-    }
-
-  };
-
-  // need to make this dynamic since it is approximated from sources
-
-  var countries = [9, 22, 29, 32, 49, 56, 58, 78, 82, 102, 117, 139, 176, 186];
-  var weight = [0.000, 0.001, 0.004, -5.0000, 0.008, 0.009, 0.037, 0.181, 0.002, 0.000, 0.415, 0.006, 0.075, 0.088];
-
-  // the fun begins!
-  //
-  // pretty simple setup ->
-  // * make base Datamap
-  // * setup timers to add random events to a queue
-  // * update the Datamap
-
-  var realTime_attacks = new Datamap({
-
-    scope: 'world',
-    element: document.getElementById('realTime_attacks'),
-    done: function(datamap) {
-      datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
-        alert('Country: ' + geography.properties.name);
-      });
-    },
-    //  projection: 'winkel3',
-    projection: 'mercator',
-
-    // change the projection to something else only if you have absolutely no cartographic sense
-
-    fills: {
-      'USA': '#CC4731',
-      'JPN': '#306596',
-      'ITA': '#667FAF',
-      'CRI': '#A9C0DE',
-      'KOR': '#CA5E5B',
-      'DEU': '#EAA9A8',
-      'MYS': '#219aff',
-      'CHN': '#ff5e48',
-      'AFR': '#ff5ab1',
-      'RUS': '#7bcdff',
-      'AFG': '#b3c4b9',
-
-      'CAN': '#70d5a5',
-      'AUS': '#3d7bb8',
-      'IND': '#3f4dff',
-      'CAF': '#56b882',
-      'ZAF': '#9b80b8',
-
-      'TUR': '#ff7077',
-      'BRA': '#aeff9b',
-      'SAU': '#1db83c',
-      'ALG': '#ff7691',
-      defaultFill: '#fce312',
-      highRateOfAttackSources: "#fa0fa0"
-    },
-    data: {
-      USA: { fillKey: "USA" },
-      JPN: { fillKey: "JPN" },
-      ITA: { fillKey: "ITA" },
-      CRI: { fillKey: "CRI" },
-      KOR: { fillKey: "KOR" },
-      DEU: { fillKey: "DEU" },
-      MYS: { fillKey: "MYS" },
-      CHN: { fillKey: "CHN" },
-      RUS: { fillKey: "RUS" },
-      AFG: { fillKey: "AFG" },
-      CAN: { fillKey: "CAN" },
-      AUS: { fillKey: "AUS" },
-      IND: { fillKey: "IND" },
-      CAF: { fillKey: "CAF" },
-      ZAF: { fillKey: "ZAF" },
-      TUR: { fillKey: "TUR" },
-      BRA: { fillKey: "BRA" },
-      SAU: { fillKey: "SAU" },
-      ALG: { fillKey: "ALG" },
-    },
-
-    geographyConfig: {
-      dataUrl: null,
-      hideAntarctica: true,
-      borderWidth: 0.75,
-      borderColor: '#4393c3',
-      popupTemplate: function(geography, data) {
-        return '<div class="hoverinfo" style="color:white;background:#249e0b; padding:5px">' +
-                geography.properties.name + '</div>';
-      },
-      popupOnHover: true,
-      popupOnClick: true,
-      highlightOnHover: true,
-      highlightFillColor: '#2eff5a',
-      highlightBorderColor: 'rgba(250, 15, 160, 0.2)',
-      highlightBorderWidth: 2
-    },
-
-    arcConfig: {
-      strokeColor: '#ff0907',
-      strokeWidth: 4,
-      arcSharpness: 1,
-      animationSpeed: 600, // Milliseconds
-      popupOnHover: true, // True to show the popup while hovering
-      popupTemplate: function(geography, data) { // This function should just return a string
-        // Case with latitude and longitude
-        if ((data.origin && data.destination) && data.origin.latitude && data.origin.longitude && data.destination.latitude && data.destination.longitude) {
-          return '<div class="hoverinfo"><strong>Arc</strong><br>Origin: ' + JSON.stringify(data.origin) + '<br>Destination: ' + JSON.stringify(data.destination) + '</div>';
+        snd_id = "starwars";
+        if (typeof tng !== 'undefined') {
+            snd_id = "tng";
         }
-        // Case with only country name
-        else if (data.origin && data.destination) {
-          return '<div class="hoverinfo"><strong>Arc</strong><br>' + data.origin + ' -> ' + data.destination + '</div>';
+        if (typeof b5 !== 'undefined') {
+            snd_id = "b5";
         }
-        // Missing information
-        else {
-          return '';
+        if (typeof wargames !== 'undefined') {
+            snd_id = "wargames";
         }
-      }
-    }
-  });
-   // here we set the dynamic color for the countries
-  var colors = d3.scale.category10();
-
-  window.setInterval(function() {
-    realTime_attacks.updateChoropleth({
-      // USA: colors(Math.random() * 10),
-      // RUS: colors(Math.random() * 100),
-      // AUS: { fillKey: 'highRateOfAttackSources' },
-      // BRA: colors(Math.random() * 30),
-      // CAN: colors(Math.random() * 10),
-      // ZAF: colors(Math.random() * 70),
-      // IND: colors(Math.random() * 20),
-      MYS: colors(Math.random() * 60),
-      // CHN: colors(Math.random() * 50),
-      // AFR: colors(Math.random() * 40),
-    });
-  }, 2000);
-
-  // we read in a modified file of all country centers
-  var centers = [];
-  d3.tsv("country_centroids_primary.csv", function(data) {
-    centers = data;
-  });
-  d3.csv("samplatlong.csv", function(data) {
-    slatlong = data;
-  });
-  d3.csv("cnlatlong.csv", function(data) {
-    cnlatlong = data;
-  });
-
-  // setup structures for the "hits" (arcs)
-  // and circle booms
-
-  var hits = FixedQueue(7, []);
-  var boom = FixedQueue(7, []);
-
-  // we need random numbers and also a way to build random ip addresses
-  function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  function getOctet() {
-    return Math.round(Math.random() * 255);
-  }
-
-  function randomIP() {
-    return (getOctet() + '.' + getOctet() + '.' + getOctet() + '.' + getOctet());
-  }
-
-  function getStroke() {
-    return Math.round(Math.random() * 100);
-  }
-
-  function getDestination() {
-    return Math.round(Math.random() * 100);
-  }
-
-  // doing this a bit fancy for a hack, but it makes it
-  // easier to group code functions together and have variables
-  // out of global scope
-  var attacks = {
-
-    interval: getRandomInt(attack_min, attack_max),
-
-    init: function() {
-      setTimeout(
-              jQuery.proxy(this.getData, this),
-              this.interval
-      );
-    },
-
-    getData: function() {
-
-      var self = this;
-
-      if (typeof norse_mode !== 'undefined') {
-        return;
-      }
-
-      if (typeof random_mode !== 'undefined') {
-        Math.floor((Math.random() * slatlong.length));
-      }
-
-      dst = Math.floor((Math.random() * slatlong.length));
-      src = Math.floor((Math.random() * slatlong.length));
-
-      if ((dst == src)) {
-        dst = src + 1;
-        if (dst > slatlong.length - 1) {
-          dst = src - 1
+        if (typeof pew !== 'undefined') {
+            snd_id = "pew";
         }
-      }
-
-      if (typeof allfx !== 'undefined') {
-        snd_id = audio_type[Math.floor((Math.random() * audio_type.length))];
-      }
-      // no guarantee of sound playing w/o the load - stupid browsers
-      if (typeof nofx === 'undefined') {
-        document.getElementById(snd_id).load();
-        document.getElementById(snd_id).play();
-      }
-
-      // add hit to the arc queue
-      // use strokeColor to set arc line color
-
-      var srclat = slatlong[src].lat;
-      var srclong = slatlong[src].long;
-      var dstlat = slatlong[dst].lat;
-      var dstlong = slatlong[dst].long;
-      which_attack = attack_type[Math.floor((Math.random() * attack_type.length))];
-      var srccountry = slatlong[src]["country"];
-      // "Hi, Mandiant!!"
-      if (typeof china_mode !== 'undefined') {
-        srclat = cnlatlong[src].lat;
-        srclong = cnlatlong[src].long;
-        if (cnlatlong[src].country == "chn") {
-          which_attack = "ZOMGOSH CHINA!";
+        if (typeof galaga !== 'undefined') {
+            snd_id = "galaga";
         }
-        srccountry = cnlatlong[src]["country"];
-      }
-      // "Hi, Kim Jong!"
-      else if (typeof dprk_mode !== 'undefined') {
-        srclat = 39.0194;
-        srclong = 125.7381;
-        which_attack = "ZOMG NORTH KOREAZ!!!";
-        srccountry = "kp";
-      }
-      // source is always Chattanooga if chatt_mode is set
-      // "Hi ThreatStream!!" http://www.csoonline.com/article/2689609/network-security/threat-intelligence-firm-mistakes-research-for-nation-state-attack.html
-      else if (typeof chatt_mode !== 'undefined') {
-        srclat = 35.0456297;
-        srclong = -85.30968;
-        which_attack = "OMG NATION STATE CHATTANOOGA!!!";
-        srccountry = "usa";
-      }
-      // blame a former employee
-      else if (typeof employee_mode !== 'undefined') {
-        if (typeof in_lat !== 'undefined' && typeof in_lon !== 'undefined') {
-          srclat = in_lat;
-          srclong = in_lon;
+        if (typeof asteroids !== 'undefined') {
+            snd_id = "asteroids";
         }
-        which_attack = "Former employee attack"
-        if (typeof employee_fname !== 'undefined' && typeof employee_lname !== 'undefined') {
-          which_attack += ":" + employee_fname + " " + employee_lname;
+        if (typeof china !== 'undefined') {
+            snd_id = "china";
         }
-        srccountry = "usa";
-      }
-
-      // Specify a country
-      else if (typeof origin !== 'undefined') {
-        srccountry = origin.toUpperCase();
-        var center_id = 0;
-        for (i = 0; i < centers.length; i++) {
-          center_id = i;
-          if (centers[i].FIPS10 === srccountry) {
-            break;
-          }
+        if (typeof timallen !== 'undefined') {
+            snd_id = "timallen";
         }
 
-        srccountry = origin.toLowerCase();
-        srclat = centers[center_id].LAT;
-        srclong = centers[center_id].LONG;
-      }
-
-      // Specify a destination country
-      if (typeof destination !== 'undefined' && getDestination() < 80) {
-        dstcountry = destination.toUpperCase();
-        var center_id = 0;
-        for (i = 0; i < centers.length; i++) {
-          center_id = i;
-          if (centers[i].FIPS10 === dstcountry) {
-            break;
-          }
+        if (typeof bad_day !== 'undefined') {
+            attack_min = 200;
+            attack_max = 200;
         }
 
-        dstcountry = destination.toLowerCase();
-        attackdiv_slatlong = dstcountry;
-        dstlat = centers[center_id].LAT;
-        dstlong = centers[center_id].LONG;
-      } else {
-        attackdiv_slatlong = slatlong[dst]["country"];
-      }
-
-      // Specify attack color
-      if (typeof greenattacks !== 'undefined') {
-        strokeColor = 'green';
-      } else if (typeof redattacks !== 'undefined') {
-        strokeColor = 'blue';
-      } else {
-        if (getStroke() < 70) {
-          strokeColor = 'green';
-        } else {
-          strokeColor = 'blue';
+        if (typeof org_name !== 'undefined') {
+            $("#titlediv").text(decodeURI(org_name) + " IPew Attack Map").html()
         }
-      }
 
-      if (typeof drill_mode != 'undefined') {
-
-        dstlat = in_lat
-        dstlong = in_lon
-      }
-
-      hits.push({
-        origin: {
-          latitude: +srclat,
-          longitude: +srclong
-        },
-        destination: {
-          latitude: +dstlat,
-          longitude: +dstlong
+        // we maintain a fixed queue of "attacks" via this class
+        function FixedQueue(size, initialValues) {
+            initialValues = (initialValues || []);
+            var queue = Array.apply(null, initialValues);
+            queue.fixedSize = size;
+            queue.push = FixedQueue.push;
+            queue.splice = FixedQueue.splice;
+            queue.unshift = FixedQueue.unshift;
+            FixedQueue.trimTail.call(queue);
+            return (queue);
         }
-      });
-      realTime_attacks.arc(hits, {
-        strokeWidth: 2,
-        strokeColor: strokeColor
-      });
 
-      // add boom to the bubbles queue
+        FixedQueue.trimHead = function() {
+            if (this.length <= this.fixedSize) {
+                return;
+            }
+            Array.prototype.splice.call(this, 0, (this.length - this.fixedSize));
+        };
 
-      boom.push({
-        radius: 7,
-        latitude: +dstlat,
-        longitude: +dstlong,
-        fillOpacity: 0.5,
-        attk: which_attack
-      });
-      realTime_attacks.bubbles(boom, {
-        popupTemplate: function(geo, data) {
-          return '<div class="hoverinfo"><img src="RoundedPin.png">' + data.attk + '</img></div>';
+        FixedQueue.trimTail = function() {
+            if (this.length <= this.fixedSize) {
+                return;
+            }
+            Array.prototype.splice.call(this, this.fixedSize, (this.length - this.fixedSize));
+        };
+
+        FixedQueue.wrapMethod = function(methodName, trimMethod) {
+            var wrapper = function() {
+                var method = Array.prototype[methodName];
+                var result = method.apply(this, arguments);
+                trimMethod.call(this);
+                return (result);
+            };
+            return (wrapper);
+        };
+
+        FixedQueue.push = FixedQueue.wrapMethod("push", FixedQueue.trimHead);
+        FixedQueue.splice = FixedQueue.wrapMethod("splice", FixedQueue.trimTail);
+        FixedQueue.unshift = FixedQueue.wrapMethod("unshift", FixedQueue.trimTail);
+
+        var rand = function(min, max) {
+            return Math.random() * (max - min) + min;
+        };
+
+        var getRandomCountry = function(countries, weight) {
+
+            var total_weight = weight.reduce(function(prev, cur, i, arr) {
+                return prev + cur;
+            });
+
+            var random_num = rand(0, total_weight);
+            var weight_sum = 0;
+
+            for (var i = 0; i < countries.length; i++) {
+                weight_sum += weight[i];
+                weight_sum = +weight_sum.toFixed(2);
+
+                if (random_num <= weight_sum) {
+                    return countries[i];
+                }
+            }
+
+        };
+
+        // need to make this dynamic since it is approximated from sources
+
+        var countries = [9, 22, 29, 32, 49, 56, 58, 78, 82, 102, 117, 139, 176, 186];
+        var weight = [0.000, 0.001, 0.004, -5.0000, 0.008, 0.009, 0.037, 0.181, 0.002, 0.000, 0.415, 0.006, 0.075, 0.088];
+
+        // the fun begins!
+        //
+        // pretty simple setup ->
+        // * make base Datamap
+        // * setup timers to add random events to a queue
+        // * update the Datamap
+
+        var realTime_attacks = new Datamap({
+
+            scope: 'world',
+            element: document.getElementById('realTime_attacks'),
+            done: function(datamap) {
+                datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
+                    alert('Country: ' + geography.properties.name);
+                });
+            },
+            //  projection: 'winkel3',
+            projection: 'mercator',
+
+            // change the projection to something else only if you have absolutely no cartographic sense
+
+            fills: {
+                'USA': '#CC4731',
+                'JPN': '#306596',
+                'ITA': '#667FAF',
+                'CRI': '#A9C0DE',
+                'KOR': '#CA5E5B',
+                'DEU': '#EAA9A8',
+                'MYS': '#219aff',
+                'CHN': '#ff5e48',
+                'AFR': '#ff5ab1',
+                'RUS': '#7bcdff',
+                'AFG': '#b3c4b9',
+
+                'CAN': '#70d5a5',
+                'AUS': '#3d7bb8',
+                'IND': '#3f4dff',
+                'CAF': '#56b882',
+                'ZAF': '#9b80b8',
+
+                'TUR': '#ff7077',
+                'BRA': '#aeff9b',
+                'SAU': '#1db83c',
+                'ALG': '#ff7691',
+                defaultFill: '#fce312',
+                highRateOfAttackSources: "#fa0fa0"
+            },
+            data: {
+                USA: {
+                    fillKey: "USA"
+                },
+                JPN: {
+                    fillKey: "JPN"
+                },
+                ITA: {
+                    fillKey: "ITA"
+                },
+                CRI: {
+                    fillKey: "CRI"
+                },
+                KOR: {
+                    fillKey: "KOR"
+                },
+                DEU: {
+                    fillKey: "DEU"
+                },
+                MYS: {
+                    fillKey: "MYS"
+                },
+                CHN: {
+                    fillKey: "CHN"
+                },
+                RUS: {
+                    fillKey: "RUS"
+                },
+                AFG: {
+                    fillKey: "AFG"
+                },
+                CAN: {
+                    fillKey: "CAN"
+                },
+                AUS: {
+                    fillKey: "AUS"
+                },
+                IND: {
+                    fillKey: "IND"
+                },
+                CAF: {
+                    fillKey: "CAF"
+                },
+                ZAF: {
+                    fillKey: "ZAF"
+                },
+                TUR: {
+                    fillKey: "TUR"
+                },
+                BRA: {
+                    fillKey: "BRA"
+                },
+                SAU: {
+                    fillKey: "SAU"
+                },
+                ALG: {
+                    fillKey: "ALG"
+                },
+            },
+
+            geographyConfig: {
+                dataUrl: null,
+                hideAntarctica: true,
+                borderWidth: 0.75,
+                borderColor: '#4393c3',
+                popupTemplate: function(geography, data) {
+                    return '<div class="hoverinfo" style="color:white;background:#249e0b; padding:5px">' +
+                        geography.properties.name + '</div>';
+                },
+                popupOnHover: true,
+                popupOnClick: true,
+                highlightOnHover: true,
+                highlightFillColor: '#2eff5a',
+                highlightBorderColor: 'rgba(250, 15, 160, 0.2)',
+                highlightBorderWidth: 2
+            },
+
+            arcConfig: {
+                strokeColor: '#ff0907',
+                strokeWidth: 4,
+                arcSharpness: 1,
+                animationSpeed: 600, // Milliseconds
+                popupOnHover: true, // True to show the popup while hovering
+                popupTemplate: function(geography, data) { // This function should just return a string
+                    // Case with latitude and longitude
+                    if ((data.origin && data.destination) && data.origin.latitude && data.origin.longitude && data.destination.latitude && data.destination.longitude) {
+                        return '<div class="hoverinfo"><strong>Arc</strong><br>Origin: ' + JSON.stringify(data.origin) + '<br>Destination: ' + JSON.stringify(data.destination) + '</div>';
+                    }
+                    // Case with only country name
+                    else if (data.origin && data.destination) {
+                        return '<div class="hoverinfo"><strong>Arc</strong><br>' + data.origin + ' -> ' + data.destination + '</div>';
+                    }
+                    // Missing information
+                    else {
+                        return '';
+                    }
+                }
+            }
+        });
+        // here we set the dynamic color for the countries
+        var colors = d3.scale.category10();
+
+        window.setInterval(function() {
+            realTime_attacks.updateChoropleth({
+                // USA: colors(Math.random() * 10),
+                // RUS: colors(Math.random() * 100),
+                // AUS: { fillKey: 'highRateOfAttackSources' },
+                // BRA: colors(Math.random() * 30),
+                // CAN: colors(Math.random() * 10),
+                // ZAF: colors(Math.random() * 70),
+                // IND: colors(Math.random() * 20),
+                MYS: colors(Math.random() * 60),
+                // CHN: colors(Math.random() * 50),
+                // AFR: colors(Math.random() * 40),
+            });
+        }, 2000);
+
+        // we read in a modified file of all country centers
+        var centers = [];
+        d3.tsv("country_centroids_primary.csv", function(data) {
+            centers = data;
+        });
+        d3.csv("samplatlong.csv", function(data) {
+            slatlong = data;
+        });
+        d3.csv("cnlatlong.csv", function(data) {
+            cnlatlong = data;
+        });
+
+        // setup structures for the "hits" (arcs)
+        // and circle booms
+
+        var hits = FixedQueue(7, []);
+        var boom = FixedQueue(7, []);
+
+        // we need random numbers and also a way to build random ip addresses
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
         }
-      });
-      var today = new Date();
-      var time =  new Date().toLocaleTimeString();
-      // update the scrolling attack div
-      $('#attackdiv').append(time + " &nbsp; " + srccountry + "  " +
-              " <span style='color:#1E90FF'>attacks</span> " +
-              // / attackdiv_slatlong + " (" + randomIP() + ") "    //this line is edit as bellow for single country(malaysia).
-              " MYS " +
-              " <span style='color:#7cc7ff'>(" + which_attack + ")</span> " +
-              "<br/>");
-     $('#attackdiv').animate({
-        scrollTop: $('#attackdiv').prop("scrollHeight")
-      }, 500);
 
-      // pick a new random time and start the timer again!
-      this.interval = getRandomInt(attack_min, attack_max);
-      this.init();
-    },
+        function getOctet() {
+            return Math.round(Math.random() * 255);
+        }
 
-  };
+        function randomIP() {
+            return (getOctet() + '.' + getOctet() + '.' + getOctet() + '.' + getOctet());
+        }
 
-  // start the ball rolling!
-  attacks.init();
+        function getStroke() {
+            return Math.round(Math.random() * 100);
+        }
 
-  // lazy-dude's responsive window
-  d3.select(window).on('resize', function() {
-    location.reload();
-  });
-</script>
+        function getDestination() {
+            return Math.round(Math.random() * 100);
+        }
+
+        // doing this a bit fancy for a hack, but it makes it
+        // easier to group code functions together and have variables
+        // out of global scope
+        var attacks = {
+
+            interval: getRandomInt(attack_min, attack_max),
+
+            init: function() {
+                setTimeout(
+                    jQuery.proxy(this.getData, this),
+                    this.interval
+                );
+            },
+
+            getData: function() {
+
+                var self = this;
+
+                if (typeof norse_mode !== 'undefined') {
+                    return;
+                }
+
+                if (typeof random_mode !== 'undefined') {
+                    Math.floor((Math.random() * slatlong.length));
+                }
+
+                dst = Math.floor((Math.random() * slatlong.length));
+                src = Math.floor((Math.random() * slatlong.length));
+
+                if ((dst == src)) {
+                    dst = src + 1;
+                    if (dst > slatlong.length - 1) {
+                        dst = src - 1
+                    }
+                }
+
+                if (typeof allfx !== 'undefined') {
+                    snd_id = audio_type[Math.floor((Math.random() * audio_type.length))];
+                }
+                // no guarantee of sound playing w/o the load - stupid browsers
+                if (typeof nofx === 'undefined') {
+                    document.getElementById(snd_id).load();
+                    document.getElementById(snd_id).play();
+                }
+
+                // add hit to the arc queue
+                // use strokeColor to set arc line color
+
+                var srclat = slatlong[src].lat;
+                var srclong = slatlong[src].long;
+                var dstlat = slatlong[dst].lat;
+                var dstlong = slatlong[dst].long;
+                which_attack = attack_type[Math.floor((Math.random() * attack_type.length))];
+                var srccountry = slatlong[src]["country"];
+                // "Hi, Mandiant!!"
+                if (typeof china_mode !== 'undefined') {
+                    srclat = cnlatlong[src].lat;
+                    srclong = cnlatlong[src].long;
+                    if (cnlatlong[src].country == "chn") {
+                        which_attack = "ZOMGOSH CHINA!";
+                    }
+                    srccountry = cnlatlong[src]["country"];
+                }
+                // "Hi, Kim Jong!"
+                else if (typeof dprk_mode !== 'undefined') {
+                    srclat = 39.0194;
+                    srclong = 125.7381;
+                    which_attack = "ZOMG NORTH KOREAZ!!!";
+                    srccountry = "kp";
+                }
+                // source is always Chattanooga if chatt_mode is set
+                // "Hi ThreatStream!!" http://www.csoonline.com/article/2689609/network-security/threat-intelligence-firm-mistakes-research-for-nation-state-attack.html
+                else if (typeof chatt_mode !== 'undefined') {
+                    srclat = 35.0456297;
+                    srclong = -85.30968;
+                    which_attack = "OMG NATION STATE CHATTANOOGA!!!";
+                    srccountry = "usa";
+                }
+                // blame a former employee
+                else if (typeof employee_mode !== 'undefined') {
+                    if (typeof in_lat !== 'undefined' && typeof in_lon !== 'undefined') {
+                        srclat = in_lat;
+                        srclong = in_lon;
+                    }
+                    which_attack = "Former employee attack"
+                    if (typeof employee_fname !== 'undefined' && typeof employee_lname !== 'undefined') {
+                        which_attack += ":" + employee_fname + " " + employee_lname;
+                    }
+                    srccountry = "usa";
+                }
+
+                // Specify a country
+                else if (typeof origin !== 'undefined') {
+                    srccountry = origin.toUpperCase();
+                    var center_id = 0;
+                    for (i = 0; i < centers.length; i++) {
+                        center_id = i;
+                        if (centers[i].FIPS10 === srccountry) {
+                            break;
+                        }
+                    }
+
+                    srccountry = origin.toLowerCase();
+                    srclat = centers[center_id].LAT;
+                    srclong = centers[center_id].LONG;
+                }
+
+                // Specify a destination country
+                if (typeof destination !== 'undefined' && getDestination() < 80) {
+                    dstcountry = destination.toUpperCase();
+                    var center_id = 0;
+                    for (i = 0; i < centers.length; i++) {
+                        center_id = i;
+                        if (centers[i].FIPS10 === dstcountry) {
+                            break;
+                        }
+                    }
+
+                    dstcountry = destination.toLowerCase();
+                    attackdiv_slatlong = dstcountry;
+                    dstlat = centers[center_id].LAT;
+                    dstlong = centers[center_id].LONG;
+                } else {
+                    attackdiv_slatlong = slatlong[dst]["country"];
+                }
+
+                // Specify attack color
+                if (typeof greenattacks !== 'undefined') {
+                    strokeColor = 'green';
+                } else if (typeof redattacks !== 'undefined') {
+                    strokeColor = 'blue';
+                } else {
+                    if (getStroke() < 70) {
+                        strokeColor = 'green';
+                    } else {
+                        strokeColor = 'blue';
+                    }
+                }
+
+                if (typeof drill_mode != 'undefined') {
+
+                    dstlat = in_lat
+                    dstlong = in_lon
+                }
+
+                hits.push({
+                    origin: {
+                        latitude: +srclat,
+                        longitude: +srclong
+                    },
+                    destination: {
+                        latitude: +dstlat,
+                        longitude: +dstlong
+                    }
+                });
+                realTime_attacks.arc(hits, {
+                    strokeWidth: 2,
+                    strokeColor: strokeColor
+                });
+
+                // add boom to the bubbles queue
+
+                boom.push({
+                    radius: 7,
+                    latitude: +dstlat,
+                    longitude: +dstlong,
+                    fillOpacity: 0.5,
+                    attk: which_attack
+                });
+                realTime_attacks.bubbles(boom, {
+                    popupTemplate: function(geo, data) {
+                        return '<div class="hoverinfo"><img src="RoundedPin.png">' + data.attk + '</img></div>';
+                    }
+                });
+                var today = new Date();
+                var time = new Date().toLocaleTimeString();
+                // update the scrolling attack div
+                $('#attackdiv').append(time + " &nbsp; " + srccountry + "  " +
+                    " <span style='color:#1E90FF'>attacks</span> " +
+                    // / attackdiv_slatlong + " (" + randomIP() + ") "    //this line is edit as bellow for single country(malaysia).
+                    " MYS " +
+                    " <span style='color:#7cc7ff'>(" + which_attack + ")</span> " +
+                    "<br/>");
+                $('#attackdiv').animate({
+                    scrollTop: $('#attackdiv').prop("scrollHeight")
+                }, 500);
+
+                // pick a new random time and start the timer again!
+                this.interval = getRandomInt(attack_min, attack_max);
+                this.init();
+            },
+
+        };
+
+        // start the ball rolling!
+        attacks.init();
+
+        // lazy-dude's responsive window
+        d3.select(window).on('resize', function() {
+            location.reload();
+        });
+    </script>
 
 </body>
 
